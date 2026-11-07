@@ -48,3 +48,34 @@ qBittorrent go to Options > Downloads > "Run external program on torrent finishe
 ## License
 
 MIT
+## Troubleshooting
+
+**"Python was not found"**
+Install Python from python.org/downloads. On the first screen, tick
+"Add python.exe to PATH". Close and reopen your terminal, then check with
+`python --version`. If the Microsoft Store message still appears, turn off the
+`python.exe` entries under Settings > Apps > Advanced app settings >
+App execution aliases.
+
+**Nothing installs and there's no `autoinstall.log`**
+The qBittorrent hook isn't running. Check that Python is on your PATH and that
+the command is saved under Options > Downloads > Run external program on
+torrent finished.
+
+**The installer opens but waits for clicks**
+It isn't an Inno Setup installer, so it can't run unattended. See the log.## Troubleshooting
+
+**"Python was not found"**
+Install Python from python.org/downloads. On the first screen, tick
+"Add python.exe to PATH". Close and reopen your terminal, then check with
+`python --version`. If the Microsoft Store message still appears, turn off the
+`python.exe` entries under Settings > Apps > Advanced app settings >
+App execution aliases.
+
+**Nothing installs and there's no `autoinstall.log`**
+The qBittorrent hook isn't running. Check that Python is on your PATH and that
+the command is saved under Options > Downloads > Run external program on
+torrent finished.
+
+**The installer opens but waits for clicks**
+It isn't an Inno Setup installer, so it can't run unattended. See the log.
