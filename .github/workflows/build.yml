@@ -1,0 +1,37 @@
+name: Build Windows app
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build AutoGameInstaller.exe
+        run: pyinstaller --onefile --windowed --name AutoGameInstaller --hidden-import autoinstall app.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoGameInstaller
+          path: dist/AutoGameInstaller.exe
+
+      - name: Attach to the GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/AutoGameInstaller.exe
+          generate_release_notes: true

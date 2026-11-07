@@ -6,22 +6,31 @@ When qBittorrent finishes downloading a torrent (the moment it switches to
 seeding), this tool finds the game's `setup.exe` and installs it into your
 chosen folder with no clicks needed.
 
-## Setup (2 minutes)
+## Install (1 minute, no Python needed)
 
-1. Install [Python 3](https://www.python.org/downloads/) (tick "Add to PATH").
+1. Download `AutoGameInstaller.exe` from the [latest release](../../releases/latest).
 2. Close qBittorrent completely (check the system tray).
-3. Run: `python setup.py` and enter your install folder (e.g. `D:\Games`).
-4. Start qBittorrent **as administrator** (otherwise installers stop at the UAC prompt).
+3. Double-click `AutoGameInstaller.exe`, pick your games folder with **Browse**, and click **Set Up**.
+4. Open qBittorrent and download a game. Done.
 
-That's it. Results are logged to `%LOCALAPPDATA%\AutoGameInstaller\autoinstall.log`.
+Windows may show a "Windows protected your PC" screen because the app isn't
+code-signed yet: click **More info > Run anyway**. The source code is all in
+this repo if you want to check it.
+
+Results are logged to `%LOCALAPPDATA%\AutoGameInstaller\autoinstall.log`
+(or click **Open log** in the app).
+
+### Run from source
+
+```
+python app.py
+```
 
 ### Manual setup
 
-If `setup.py` can't find your qBittorrent settings: copy `autoinstall.py` and
-`config.json.example` (renamed `config.json`) into one folder, then in
-qBittorrent go to Options > Downloads > "Run external program on torrent finished":
-
-    pythonw "C:\path\to\autoinstall.py" "%N" "%F"
+If the app can't find qBittorrent's settings, copy the command shown at the
+bottom of the window into qBittorrent: Options > Downloads >
+"Run external program on torrent finished".
 
 ## How it works
 
@@ -29,53 +38,45 @@ qBittorrent go to Options > Downloads > "Run external program on torrent finishe
 - **Inno Setup installers** (most game repacks) run with `/SILENT /DIR=...`:
   the progress window shows, but every page is answered for you.
 - **Other installers** just open normally; you click through them.
+- qBittorrent is set to start as administrator so installers don't stop at a
+  Windows permission prompt. Windows asks for permission once each time
+  qBittorrent opens.
 - Everything is logged so you can see what happened overnight.
+
+## Troubleshooting
+
+**Nothing installs and there's no `autoinstall.log`**
+The qBittorrent hook isn't running. Re-run the app, make sure qBittorrent was
+fully closed first, then check Options > Downloads > "Run external program on
+torrent finished" is filled in.
+
+**The installer opens but waits for clicks**
+It isn't an Inno Setup installer, so it can't run unattended. See the log.
+
+**"No setup.exe found" in the log**
+The download is probably an archive or disc image (`.rar`, `.iso`). Not
+supported yet.
 
 ## Limitations
 
 - Windows + qBittorrent only (for now).
 - `.rar` / `.iso` downloads aren't extracted yet.
-- Only installs; it doesn't scan files. Only use it on downloads you trust and
-  are allowed to have.
+- It runs the installer in every finished torrent that contains one. Only use
+  it on downloads you trust and are allowed to have.
 
 ## Roadmap
 
 - Extract archives / mount ISOs automatically
+- Only run for torrents in a chosen category
 - Antivirus scan before running
 - Support for other torrent clients
-- Packaged `.exe` installer
+- Code-signed release
+
+## Building the .exe
+
+Push a tag like `v0.1.0` and GitHub Actions builds `AutoGameInstaller.exe` and
+attaches it to a release (see `.github/workflows/build.yml`).
 
 ## License
 
 MIT
-## Troubleshooting
-
-**"Python was not found"**
-Install Python from python.org/downloads. On the first screen, tick
-"Add python.exe to PATH". Close and reopen your terminal, then check with
-`python --version`. If the Microsoft Store message still appears, turn off the
-`python.exe` entries under Settings > Apps > Advanced app settings >
-App execution aliases.
-
-**Nothing installs and there's no `autoinstall.log`**
-The qBittorrent hook isn't running. Check that Python is on your PATH and that
-the command is saved under Options > Downloads > Run external program on
-torrent finished.
-
-**The installer opens but waits for clicks**
-It isn't an Inno Setup installer, so it can't run unattended. See the log.## Troubleshooting
-
-**"Python was not found"**
-Install Python from python.org/downloads. On the first screen, tick
-"Add python.exe to PATH". Close and reopen your terminal, then check with
-`python --version`. If the Microsoft Store message still appears, turn off the
-`python.exe` entries under Settings > Apps > Advanced app settings >
-App execution aliases.
-
-**Nothing installs and there's no `autoinstall.log`**
-The qBittorrent hook isn't running. Check that Python is on your PATH and that
-the command is saved under Options > Downloads > Run external program on
-torrent finished.
-
-**The installer opens but waits for clicks**
-It isn't an Inno Setup installer, so it can't run unattended. See the log.

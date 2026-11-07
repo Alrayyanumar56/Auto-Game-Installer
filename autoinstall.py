@@ -11,7 +11,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parent
+# When packaged as an .exe, settings and log live next to the .exe.
+if getattr(sys, "frozen", False):
+    BASE = Path(sys.executable).resolve().parent
+else:
+    BASE = Path(__file__).resolve().parent
 logging.basicConfig(
     filename=BASE / "autoinstall.log",
     level=logging.INFO,
@@ -23,7 +27,11 @@ INSTALLER_NAMES = {"setup.exe", "install.exe", "installer.exe"}
 
 
 def load_config():
-    cfg = json.loads((BASE / "config.json").read_text(encoding="utf-8"))
+    try:
+        cfg = json.loads((BASE / "config.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        cfg = {}
+        log("config.json missing or unreadable, using default install folder.")
     cfg.setdefault("install_root", r"D:\Games")
     return cfg
 
