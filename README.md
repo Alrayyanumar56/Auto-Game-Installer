@@ -1,5 +1,9 @@
 # Auto Game Installer
 
+
+https://github.com/user-attachments/assets/98b1d990-f77a-4e61-8f37-a2d6ea1b56ed
+
+
 Leave your PC on overnight, wake up to a game that's already installed.
 
 When qBittorrent finishes downloading a torrent (the moment it switches to
