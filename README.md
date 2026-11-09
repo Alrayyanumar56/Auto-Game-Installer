@@ -1,10 +1,11 @@
+
+
+https://github.com/user-attachments/assets/6ebcf867-9b01-4ae0-a0f5-c1c47b66ffc9
+
 # Auto Game Installer
 
 
 Uploading AutoGameInstaller.mp4…
-
-
-https://github.com/user-attachments/assets/98b1d990-f77a-4e61-8f37-a2d6ea1b56ed
 
 
 Leave your PC on overnight, wake up to a game that's already installed.
