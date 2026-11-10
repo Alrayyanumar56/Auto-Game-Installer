@@ -2,8 +2,12 @@
 
 https://github.com/user-attachments/assets/6ebcf867-9b01-4ae0-a0f5-c1c47b66ffc9
 
+
+
 # Auto Game Installer
 
+
+Installer/releases/latest/download/AutoGameInstaller.exe
 
 Uploading AutoGameInstaller.mp4…
 
