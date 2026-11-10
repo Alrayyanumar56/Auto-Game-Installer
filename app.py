@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "AutoGameInstaller"
+APP_VERSION = "0.2.0"
 FROZEN = getattr(sys, "frozen", False)
 APP_DIR = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / APP_NAME
 # Settings and log sit next to whatever runs the hook (the installed .exe, or
@@ -20,6 +21,17 @@ APP_DIR = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / APP_NAME
 CFG_DIR = APP_DIR if FROZEN else Path(__file__).resolve().parent
 QB_INI = Path(os.environ.get("APPDATA", "")) / "qBittorrent" / "qBittorrent.ini"
 NO_WINDOW = 0x08000000  # keep console windows from flashing on Windows
+ASSETS = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / "assets"
+
+# One colour scheme everywhere (app, README, videos): night navy + mint.
+BG = "#0B1020"
+SURFACE = "#141B2E"
+BORDER = "#232C47"
+TEXT = "#E8EEFF"
+MUTED = "#8A94B2"
+MINT = "#3DDC97"
+MINT_HOVER = "#63E8AF"
+RED = "#FF6B6B"
 
 
 def qt_quote(s: str) -> str:
@@ -101,7 +113,9 @@ def set_run_as_admin(qb_exe: Path):
         winreg.SetValueEx(key, str(qb_exe), 0, winreg.REG_SZ, flags)
 
 
-def apply_setup(install_root: str, qb_exe: str, run_admin: bool):
+def apply_setup(
+    install_root: str, qb_exe: str, run_admin: bool, mute: bool = True, shutdown: bool = False
+):
     """Do every setup step. Returns a list of (ok, message)."""
     results = []
 
@@ -116,7 +130,15 @@ def apply_setup(install_root: str, qb_exe: str, run_admin: bool):
         Path(install_root).mkdir(parents=True, exist_ok=True)
         CFG_DIR.mkdir(parents=True, exist_ok=True)
         (CFG_DIR / "config.json").write_text(
-            json.dumps({"install_root": install_root}, indent=2), encoding="utf-8"
+            json.dumps(
+                {
+                    "install_root": install_root,
+                    "mute_installer": mute,
+                    "shutdown_after_install": shutdown,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
         )
         if FROZEN:
             target = APP_DIR / f"{APP_NAME}.exe"
@@ -177,17 +199,75 @@ def apply_setup(install_root: str, qb_exe: str, run_admin: bool):
 
 def gui():
     import tkinter as tk
-    from tkinter import filedialog, ttk
+    from tkinter import filedialog
 
     root = tk.Tk()
     root.title("Auto Game Installer")
+    root.configure(bg=BG)
     root.resizable(False, False)
-    pad = {"padx": 12, "pady": 6}
+    try:
+        logo = tk.PhotoImage(file=str(ASSETS / "icon_512.png"))
+        root.iconphoto(True, logo)
+        header_logo = logo.subsample(8, 8)  # 64 px
+    except tk.TclError:
+        header_logo = None
 
+    F = "Segoe UI"
     games_var = tk.StringVar(value=r"D:\Games" if os.path.exists("D:\\") else r"C:\Games")
     qb = find_qbittorrent()
     qb_var = tk.StringVar(value=str(qb) if qb else "")
     admin_var = tk.BooleanVar(value=True)
+    mute_var = tk.BooleanVar(value=True)
+    shutdown_var = tk.BooleanVar(value=False)
+
+    # ---- small styled widgets -------------------------------------------
+    def button(parent, text, command, primary=False):
+        bg, fg, hover = (MINT, BG, MINT_HOVER) if primary else (BORDER, TEXT, "#2D3858")
+        b = tk.Button(
+            parent, text=text, command=command, bg=bg, fg=fg, activebackground=hover,
+            activeforeground=fg, relief="flat", bd=0, cursor="hand2",
+            font=(F, 10, "bold" if primary else "normal"), padx=16, pady=7,
+        )
+        b.bind("<Enter>", lambda _e: b.configure(bg=hover))
+        b.bind("<Leave>", lambda _e: b.configure(bg=bg))
+        return b
+
+    def entry(parent, var):
+        return tk.Entry(
+            parent, textvariable=var, bg=BG, fg=TEXT, insertbackground=TEXT,
+            relief="flat", font=(F, 10), highlightthickness=1,
+            highlightbackground=BORDER, highlightcolor=MINT,
+        )
+
+    def check(parent, text, var):
+        return tk.Checkbutton(
+            parent, text=text, variable=var, bg=SURFACE, fg=TEXT, selectcolor=BG,
+            activebackground=SURFACE, activeforeground=TEXT, font=(F, 10),
+            anchor="w", bd=0, highlightthickness=0, cursor="hand2",
+        )
+
+    def label(parent, text, size=10, color=TEXT, bold=False, bg=None):
+        return tk.Label(
+            parent, text=text, bg=bg or parent["bg"], fg=color,
+            font=(F, size, "bold" if bold else "normal"), anchor="w", justify="left",
+        )
+
+    # ---- header ---------------------------------------------------------
+    head = tk.Frame(root, bg=BG)
+    head.pack(fill="x", padx=24, pady=(22, 14))
+    if header_logo:
+        tk.Label(head, image=header_logo, bg=BG).pack(side="left", padx=(0, 14))
+    titles = tk.Frame(head, bg=BG)
+    titles.pack(side="left")
+    label(titles, "Auto Game Installer", 17, TEXT, True).pack(anchor="w")
+    label(titles, "Download at night. Wake up to a game that's ready to play.", 10, MUTED).pack(anchor="w")
+
+    # ---- paths card -----------------------------------------------------
+    card = tk.Frame(root, bg=SURFACE, highlightthickness=1, highlightbackground=BORDER)
+    card.pack(fill="x", padx=24)
+    inner = tk.Frame(card, bg=SURFACE)
+    inner.pack(fill="x", padx=16, pady=14)
+    inner.columnconfigure(0, weight=1)
 
     def pick_folder():
         chosen = filedialog.askdirectory(initialdir=games_var.get() or None)
@@ -201,66 +281,85 @@ def gui():
         if chosen:
             qb_var.set(os.path.normpath(chosen))
 
-    ttk.Label(root, text="Install games to:").grid(row=0, column=0, sticky="w", **pad)
-    ttk.Entry(root, textvariable=games_var, width=50).grid(row=0, column=1, **pad)
-    ttk.Button(root, text="Browse...", command=pick_folder).grid(row=0, column=2, **pad)
+    label(inner, "Install games to", 9, MUTED).grid(row=0, column=0, sticky="w")
+    entry(inner, games_var).grid(row=1, column=0, sticky="ew", ipady=6, pady=(2, 10))
+    button(inner, "Browse", pick_folder).grid(row=1, column=1, padx=(8, 0), pady=(2, 10))
+    label(inner, "qBittorrent location", 9, MUTED).grid(row=2, column=0, sticky="w")
+    entry(inner, qb_var).grid(row=3, column=0, sticky="ew", ipady=6, pady=(2, 0))
+    button(inner, "Browse", pick_qb).grid(row=3, column=1, padx=(8, 0), pady=(2, 0))
 
-    ttk.Label(root, text="qBittorrent location:").grid(row=1, column=0, sticky="w", **pad)
-    ttk.Entry(root, textvariable=qb_var, width=50).grid(row=1, column=1, **pad)
-    ttk.Button(root, text="Browse...", command=pick_qb).grid(row=1, column=2, **pad)
+    # ---- options card ---------------------------------------------------
+    opts = tk.Frame(root, bg=SURFACE, highlightthickness=1, highlightbackground=BORDER)
+    opts.pack(fill="x", padx=24, pady=(12, 0))
+    oi = tk.Frame(opts, bg=SURFACE)
+    oi.pack(fill="x", padx=12, pady=10)
+    check(oi, "Start qBittorrent as administrator (installs run without prompts)", admin_var).pack(fill="x", pady=2)
+    check(oi, "Mute installer sound (window stays visible)", mute_var).pack(fill="x", pady=2)
+    check(oi, "Shut down the PC after the last queued install finishes", shutdown_var).pack(fill="x", pady=2)
 
-    ttk.Checkbutton(
-        root,
-        text="Start qBittorrent as administrator (needed so installs run unattended)",
-        variable=admin_var,
-    ).grid(row=2, column=0, columnspan=3, sticky="w", **pad)
+    # ---- status ---------------------------------------------------------
+    status = tk.Text(
+        root, height=6, width=64, bg=BG, fg=TEXT, relief="flat", wrap="word", state="disabled",
+        font=(F, 10), highlightthickness=1, highlightbackground=BORDER, padx=10, pady=8,
+    )
+    status.tag_configure("ok", foreground=MINT)
+    status.tag_configure("bad", foreground=RED)
+    status.tag_configure("dim", foreground=MUTED)
 
-    status = tk.Text(root, height=9, width=78, state="disabled", wrap="word")
-    status.grid(row=4, column=0, columnspan=3, **pad)
-
-    def show(lines):
+    def show(items):
         status.configure(state="normal")
         status.delete("1.0", "end")
-        status.insert("end", "\n".join(lines))
+        for tag, text in items:
+            status.insert("end", text + "\n", tag)
         status.configure(state="disabled")
 
     def on_setup():
-        results = apply_setup(games_var.get().strip(), qb_var.get().strip(), admin_var.get())
-        lines = [("[OK]  " if good else "[!!]  ") + msg for good, msg in results]
-        lines.append("")
+        results = apply_setup(
+            games_var.get().strip(), qb_var.get().strip(),
+            admin_var.get(), mute_var.get(), shutdown_var.get(),
+        )
+        items = [("ok" if good else "bad", ("\u2713  " if good else "!  ") + msg) for good, msg in results]
         if all(good for good, _ in results):
-            lines.append("All done. Start qBittorrent and download a game. Check 'Open log' later.")
+            items.append(("dim", "\nAll done. Start qBittorrent and download something."))
         else:
-            lines.append("Some steps need attention (see [!!] above). You can also use the manual command below.")
-        show(lines)
+            items.append(("dim", "\nFix the red lines, then click Set Up again, or use the manual command below."))
+        show(items)
 
     def open_log():
         log = CFG_DIR / "autoinstall.log"
         if log.exists():
             os.startfile(str(log))  # noqa: S606
         else:
-            show(["No log yet. It appears after the first download finishes."])
+            show([("dim", "No log yet. It appears after the first download finishes.")])
 
-    buttons = ttk.Frame(root)
-    buttons.grid(row=3, column=0, columnspan=3, sticky="w", **pad)
-    ttk.Button(buttons, text="Set Up", command=on_setup).pack(side="left", padx=(0, 8))
-    ttk.Button(buttons, text="Open log", command=open_log).pack(side="left")
+    bar = tk.Frame(root, bg=BG)
+    bar.pack(fill="x", padx=24, pady=14)
+    button(bar, "Set Up", on_setup, primary=True).pack(side="left")
+    button(bar, "Open log", open_log).pack(side="left", padx=(8, 0))
+    label(bar, f"v{APP_VERSION}", 9, MUTED).pack(side="right")
 
-    ttk.Label(
+    status.pack(fill="x", padx=24)
+    show([("dim", "Pick your folders, choose your options, then click Set Up.")])
+
+    # ---- manual fallback ------------------------------------------------
+    label(
         root,
-        text="Manual fallback: paste this into qBittorrent > Options > Downloads >\n"
-        "'Run external program on torrent finished'",
-    ).grid(row=5, column=0, columnspan=3, sticky="w", **pad)
+        "Manual fallback: qBittorrent > Options > Downloads > Run external program on torrent finished",
+        9, MUTED,
+    ).pack(fill="x", padx=24, pady=(14, 4))
+    manual = tk.Frame(root, bg=BG)
+    manual.pack(fill="x", padx=24, pady=(0, 22))
+    manual.columnconfigure(0, weight=1)
     cmd_var = tk.StringVar(value=hook_command())
-    ttk.Entry(root, textvariable=cmd_var, width=62, state="readonly").grid(
-        row=6, column=0, columnspan=2, sticky="w", **pad
-    )
+    e = entry(manual, cmd_var)
+    e.configure(state="readonly", readonlybackground=BG)
+    e.grid(row=0, column=0, sticky="ew", ipady=5)
 
     def copy_cmd():
         root.clipboard_clear()
         root.clipboard_append(cmd_var.get())
 
-    ttk.Button(root, text="Copy", command=copy_cmd).grid(row=6, column=2, **pad)
+    button(manual, "Copy", copy_cmd).grid(row=0, column=1, padx=(8, 0))
 
     root.mainloop()
 

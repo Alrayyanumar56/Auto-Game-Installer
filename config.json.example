@@ -1,3 +1,5 @@
 {
-  "install_root": "D:\\Games"
+  "install_root": "D:\\Games",
+  "mute_installer": true,
+  "shutdown_after_install": false
 }

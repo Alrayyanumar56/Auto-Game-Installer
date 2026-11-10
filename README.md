@@ -1,93 +1,83 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Auto Game Installer: download at night, wake up to a game that's ready to play" width="100%">
+</p>
 
+<p align="center">
+  <a href="https://github.com/Alrayyanumar56/Auto-Game-Installer/releases/latest/download/AutoGameInstaller.exe"><img src="https://img.shields.io/badge/Download_for_Windows-3DDC97?style=for-the-badge&logo=windows&logoColor=0B1020&labelColor=0B1020" alt="Download for Windows"></a>
+</p>
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/Alrayyanumar56/Auto-Game-Installer?include_prereleases&color=3DDC97&labelColor=0B1020" alt="Latest release">
+  <img src="https://img.shields.io/badge/platform-Windows-3DDC97?labelColor=0B1020" alt="Windows">
+  <img src="https://img.shields.io/github/license/Alrayyanumar56/Auto-Game-Installer?color=3DDC97&labelColor=0B1020" alt="MIT license">
+</p>
 
-https://github.com/user-attachments/assets/6ebcf867-9b01-4ae0-a0f5-c1c47b66ffc9
+<!-- Drag your demo video here in the GitHub editor so it embeds. -->
 
+**Leave your PC on overnight. Wake up to a game that's already installed.**
 
-
-# Auto Game Installer
-
-
-Installer/releases/latest/download/AutoGameInstaller.exe
-
-Uploading AutoGameInstaller.mp4…
-
-
-Leave your PC on overnight, wake up to a game that's already installed.
-
-When qBittorrent finishes downloading a torrent (the moment it switches to
-seeding), this tool finds the game's `setup.exe` and installs it into your
-chosen folder with no clicks needed.
+When qBittorrent finishes a download, Auto Game Installer finds the game's `setup.exe`, installs it into the folder you chose, and logs what happened. No clicking, no waiting in the morning.
 
 ## Install (1 minute, no Python needed)
 
-1. Download `AutoGameInstaller.exe` from the [latest release](../../releases/latest).
+1. Download [`AutoGameInstaller.exe`](https://github.com/Alrayyanumar56/Auto-Game-Installer/releases/latest/download/AutoGameInstaller.exe).
 2. Close qBittorrent completely (check the system tray).
-3. Double-click `AutoGameInstaller.exe`, pick your games folder with **Browse**, and click **Set Up**.
-4. Open qBittorrent and download a game. Done.
+3. Open `AutoGameInstaller.exe`, pick your games folder, choose your options, and click **Set Up**.
+4. Start qBittorrent and download a game. Done.
 
-Windows may show a "Windows protected your PC" screen because the app isn't
-code-signed yet: click **More info > Run anyway**. The source code is all in
-this repo if you want to check it.
+> **Windows shows "Windows protected your PC"?** The app isn't code-signed yet, so SmartScreen warns about every new unsigned program. Click **More info → Run anyway**. The full source is in this repo, and each release includes a `.sha256` file so you can check your download.
 
-Results are logged to `%LOCALAPPDATA%\AutoGameInstaller\autoinstall.log`
-(or click **Open log** in the app).
+## Features
 
-### Run from source
-
-```
-python app.py
-```
-
-### Manual setup
-
-If the app can't find qBittorrent's settings, copy the command shown at the
-bottom of the window into qBittorrent: Options > Downloads >
-"Run external program on torrent finished".
+- **Hands-free installs.** Runs the setup the moment a download finishes.
+- **Install queue.** Two downloads finishing together install one after the other, never at the same time.
+- **Quiet mode.** Mutes the installer's sound so it can't blast music at 3 AM. The window stays visible.
+- **Shut down when done.** Optionally turns the PC off after the *last* queued install finishes (60-second warning; cancel with `shutdown /a`).
+- **Full log.** See exactly what happened overnight with **Open log**.
 
 ## How it works
 
-- Finds `setup.exe` / `install.exe` / `installer.exe` in the finished download.
-- **Inno Setup installers** (most game repacks) run with `/SILENT /DIR=...`:
-  the progress window shows, but every page is answered for you.
-- **Other installers** just open normally; you click through them.
-- qBittorrent is set to start as administrator so installers don't stop at a
-  Windows permission prompt. Windows asks for permission once each time
-  qBittorrent opens.
-- Everything is logged so you can see what happened overnight.
+- Finds `setup.exe`, `install.exe` or `installer.exe` in the finished download.
+- **Inno Setup installers** (most game repacks) run with `/SILENT /DIR=...`: the progress window shows, but every page is answered for you.
+- **Other installers** open normally and wait for you to click through.
+- qBittorrent can start as administrator so installers don't stop at a Windows permission prompt (Windows asks once each time qBittorrent opens).
+
+Settings and the log live in `%LOCALAPPDATA%\AutoGameInstaller`.
 
 ## Troubleshooting
 
-**Nothing installs and there's no `autoinstall.log`**
-The qBittorrent hook isn't running. Re-run the app, make sure qBittorrent was
-fully closed first, then check Options > Downloads > "Run external program on
-torrent finished" is filled in.
+**Nothing installs and there's no `autoinstall.log`.** The qBittorrent hook isn't running. Re-run the app with qBittorrent fully closed, then check Options → Downloads → "Run external program on torrent finished".
 
-**The installer opens but waits for clicks**
-It isn't an Inno Setup installer, so it can't run unattended. See the log.
+**The installer opens but waits for clicks.** It isn't an Inno Setup installer, so it can't run unattended. The log says so.
 
-**"No setup.exe found" in the log**
-The download is probably an archive or disc image (`.rar`, `.iso`). Not
-supported yet.
+**"No setup.exe found" in the log.** The download is probably an archive or disc image (`.rar`, `.iso`). Not supported yet.
+
+**Still hearing the installer.** Muting starts a split second after the window opens, so a very short blip is possible. If it never mutes, the log says why.
+
+**Manual setup.** Copy the command shown at the bottom of the app into qBittorrent: Options → Downloads → "Run external program on torrent finished".
 
 ## Limitations
 
-- Windows + qBittorrent only (for now).
-- `.rar` / `.iso` downloads aren't extracted yet.
-- It runs the installer in every finished torrent that contains one. Only use
-  it on downloads you trust and are allowed to have.
+- Windows and qBittorrent only (for now).
+- `.rar` and `.iso` downloads aren't extracted yet.
+- Shutdown waits for queued *installs*, not for torrents that are still downloading.
+- It runs the installer in every finished torrent that contains one. It doesn't scan files. **Only use it on downloads you trust and are allowed to have.**
 
 ## Roadmap
 
-- Extract archives / mount ISOs automatically
-- Only run for torrents in a chosen category
-- Antivirus scan before running
-- Support for other torrent clients
-- Code-signed release
+- [ ] Extract archives and mount ISOs automatically
+- [ ] Antivirus scan before running anything
+- [ ] Only run for torrents in a chosen category
+- [ ] Support for other torrent clients
+- [ ] Code-signed release
 
-## Building the .exe
+## Run from source
 
-Push a tag like `v0.1.0` and GitHub Actions builds `AutoGameInstaller.exe` and
-attaches it to a release (see `.github/workflows/build.yml`).
+```
+pip install -r requirements.txt
+python app.py
+```
+
+Pushing a tag like `v0.2.0` makes GitHub Actions build `AutoGameInstaller.exe` and attach it to a release. Tags with a dash (for example `v0.2.0-beta`) are marked as pre-releases.
 
 ## License
 
