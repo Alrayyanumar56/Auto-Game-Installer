@@ -1,15 +1,32 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Auto Game Installer: download at night, wake up to a game that's ready to play" width="100%">
+ <p align="center">
+  <a href="https://github.com/Alrayyanumar56/Auto-Game-Installer/releases/tag/v0.2.0-beta">
+    <img src="assets/banner.png" alt="Auto Game Installer: Download at night, wake up to a game that's ready to play" width="100%">
+  </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Alrayyanumar56/Auto-Game-Installer/releases/latest/download/AutoGameInstaller.exe"><img src="https://img.shields.io/badge/Download_for_Windows-3DDC97?style=for-the-badge&logo=windows&logoColor=0B1020&labelColor=0B1020" alt="Download for Windows"></a>
+  <a href="https://github.com/Alrayyanumar56/Auto-Game-Installer/releases/download/v0.2.0-beta/AutoGameInstaller.exe">
+    <img src="https://img.shields.io/badge/Download_for_Windows-3DDC97?style=for-the-badge&logo=windows&logoColor=0B1020&labelColor=0B1020" alt="Download for Windows">
+  </a>
 </p>
+
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/Alrayyanumar56/Auto-Game-Installer?include_prereleases&color=3DDC97&labelColor=0B1020" alt="Latest release">
-  <img src="https://img.shields.io/badge/platform-Windows-3DDC97?labelColor=0B1020" alt="Windows">
-  <img src="https://img.shields.io/github/license/Alrayyanumar56/Auto-Game-Installer?color=3DDC97&labelColor=0B1020" alt="MIT license">
+  <a href="https://github.com/Alrayyanumar56/Auto-Game-Installer/releases/tag/v0.2.0-beta">
+    <img src="https://img.shields.io/github/v/release/Alrayyanumar56/Auto-Game-Installer?include_prereleases&color=3DDC97&labelColor=0B1020" alt="Latest release">
+  </a>
+  <a href="https://github.com/Alrayyanumar56/Auto-Game-Installer">
+    <img src="https://img.shields.io/badge/platform-Windows-3DDC97?labelColor=0B1020" alt="Windows">
+  </a>
+  <a href="https://github.com/Alrayyanumar56/Auto-Game-Installer?tab=MIT-1-ov-file">
+    <img src="https://img.shields.io/github/license/Alrayyanumar56/Auto-Game-Installer?color=3DDC97&labelColor=0B1020" alt="MIT license">
+  </a>
 </p>
+
+
+
+
+https://github.com/user-attachments/assets/0efb101e-8ada-446d-9b42-8f44382cb76d
+
 
 <!-- Drag your demo video here in the GitHub editor so it embeds. -->
 
